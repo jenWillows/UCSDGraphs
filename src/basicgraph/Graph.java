@@ -1,6 +1,8 @@
 package basicgraph;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -122,7 +124,16 @@ public abstract class Graph {
 	 */
 	public List<Integer> degreeSequence() {
 		// XXX: Implement in part 1 of week 1
-		return null;
+		List<Integer> degrees = new ArrayList<Integer>();
+		
+		for(int i=0; i<numVertices; i++){
+			int degree = getNeighbors(i).size() + getInNeighbors(i).size();
+			degrees.add(degree);
+		}
+		
+		degrees.sort(Collections.reverseOrder());
+		
+		return degrees;
 	}
 	
 	/**
@@ -228,7 +239,7 @@ public abstract class Graph {
 
 	
 	public static void main (String[] args) {
-		GraphLoader.createIntersectionsFile("data/maps/myucsd.map", "data/intersections/myucsd.intersections");
+		GraphLoader.createIntersectionsFile("data/maps/ucsd.map", "data/intersections/ucsd.intersections");
 		
 
 		// For testing of Part 1 functionality
@@ -240,7 +251,7 @@ public abstract class Graph {
 		System.out.println("****");
 		System.out.println("Roads / intersections:");
 		GraphAdjList graphFromFile = new GraphAdjList();
-		GraphLoader.loadRoadMap("data/testdata/simpletest.map", graphFromFile);
+		GraphLoader.loadRoadMap("data/maps/ucsd.map", graphFromFile);
 		System.out.println(graphFromFile);
 		
 		System.out.println("Observe all degrees are <= 12.");
@@ -261,7 +272,13 @@ public abstract class Graph {
 		// Test your distance2 code here.
 		System.out.println("Testing distance-two methods on sample graphs...");
 		System.out.println("Goal: implement method using two approaches.");
-
+        GraphAdjList simple = new GraphAdjList();
+        GraphLoader.loadRoadMap("data/testdata/simpletest.map", simple);
+        List<Integer> dis2 = simple.getDistance2(1);
+        
+        System.out.println(simple);
+        System.out.println("The dis2 nodes of index 0 node is:");
+        System.out.println(dis2);
 
 		
 	}
