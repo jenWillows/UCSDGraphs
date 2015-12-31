@@ -8,7 +8,10 @@
 package roadgraph;
 
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -25,7 +28,7 @@ import util.GraphLoader;
  */
 public class MapGraph {
 	//TODO: Add your member variables here in WEEK 2
-	private HashMap<GeographicPoint, MapNode> nodes;
+	private HashMap<GeographicPoint, MapNode> vertices;
 	
 	/** 
 	 * Create a new empty MapGraph 
@@ -33,7 +36,7 @@ public class MapGraph {
 	public MapGraph()
 	{
 		// TODO: Implement in this constructor in WEEK 2
-		nodes = new HashMap<GeographicPoint, MapNode>();
+		vertices = new HashMap<GeographicPoint, MapNode>();
 	}
 	
 	/**
@@ -43,7 +46,9 @@ public class MapGraph {
 	public int getNumVertices()
 	{
 		//TODO: Implement this method in WEEK 2
-		return 0;
+		Set<GeographicPoint> points = getVertices();
+		
+		return points.size();
 	}
 	
 	/**
@@ -53,7 +58,12 @@ public class MapGraph {
 	public Set<GeographicPoint> getVertices()
 	{
 		//TODO: Implement this method in WEEK 2
-		return null;
+		Set<GeographicPoint> result = new HashSet<GeographicPoint>();
+		
+		for(GeographicPoint key: vertices.keySet()){
+			result.add(key);
+		}
+		return result;
 	}
 	
 	/**
@@ -62,8 +72,14 @@ public class MapGraph {
 	 */
 	public int getNumEdges()
 	{
+		int total = 0;
 		//TODO: Implement this method in WEEK 2
-		return 0;
+		for(GeographicPoint key: vertices.keySet()){
+			MapNode vertex = vertices.get(key);
+			List<MapEdge> outEdges = vertex.getOutEdges();
+			total += outEdges.size();
+		}
+		return total;
 	}
 
 	
@@ -78,7 +94,13 @@ public class MapGraph {
 	public boolean addVertex(GeographicPoint location)
 	{
 		// TODO: Implement this method in WEEK 2
-		return false;
+		if(location == null) return false;
+		if(vertices.containsKey(location)) return false;
+		
+		MapNode newNode = new MapNode(location);
+		vertices.put(location, newNode);
+		
+		return true;
 	}
 	
 	/**
@@ -97,7 +119,21 @@ public class MapGraph {
 			String roadType, double length) throws IllegalArgumentException {
 
 		//TODO: Implement this method in WEEK 2
+		if(from == null || to == null || roadName == null || roadType == null){
+			throw new IllegalArgumentException();
+		}
+		if(length < 0){
+			throw new IllegalArgumentException();
+		}
+		if(!vertices.containsKey(from) || !vertices.containsKey(to)){
+			throw new IllegalArgumentException();
+		}
 		
+		MapNode fromVertex = vertices.get(from);
+		MapNode toVertex = vertices.get(to);
+		
+		MapEdge newEdge = new MapEdge(fromVertex, toVertex, roadName, roadType, length);
+		fromVertex.addOutEdge(newEdge);
 	}
 	
 
@@ -129,10 +165,50 @@ public class MapGraph {
 		
 		// Hook for visualization.  See writeup.
 		//nodeSearched.accept(next.getLocation());
+		LinkedList<MapNode> nextVistNodeList = new LinkedList<MapNode>();
+		List<MapNode> visitedNodeList = new ArrayList<MapNode>();
+		HashMap<MapNode, MapNode> parentPair = new HashMap<MapNode, MapNode>();	
 
-		return null;
+		MapNode current = vertices.get(start);
+		visitedNodeList.add(current);
+		
+		while(!current.getLocation().equals(goal)){
+			List<MapEdge> outEdges = current.getOutEdges();
+			for(MapEdge edge: outEdges){
+				MapNode toNeighbor = edge.getEndNode();
+				
+				if(!visitedNodeList.contains(toNeighbor)){
+					visitedNodeList.add(toNeighbor);
+					nextVistNodeList.add(toNeighbor);
+					parentPair.put(toNeighbor, current);
+					
+					nodeSearched.accept(toNeighbor.getLocation());
+				}			
+			}		
+			current = nextVistNodeList.remove();			
+		}
+		
+		List<GeographicPoint> path = restorePath(parentPair, start, goal);
+        
+		return path;
 	}
 	
+	private List<GeographicPoint> restorePath(HashMap<MapNode, MapNode> pair, GeographicPoint start, 
+		     GeographicPoint goal){
+		List<GeographicPoint> path = new ArrayList<GeographicPoint>();
+		
+		GeographicPoint child = goal;
+		GeographicPoint parent = pair.get(child).getLocation();
+		path.add(child);
+        while (!parent.equals(start)){
+        	path.add(parent);
+        	child = parent;
+        	parent = pair.get(child).getLocation();
+        }
+        path.add(start);
+		
+		return path;
+	}
 
 	/** Find the path from start to goal using Dijkstra's algorithm
 	 * 
