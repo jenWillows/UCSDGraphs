@@ -9,6 +9,7 @@ package roadgraph;
 
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -167,7 +168,7 @@ public class MapGraph {
 		//nodeSearched.accept(next.getLocation());
 		LinkedList<MapNode> nextVistNodeList = new LinkedList<MapNode>();
 		List<MapNode> visitedNodeList = new ArrayList<MapNode>();
-		HashMap<MapNode, MapNode> parentPair = new HashMap<MapNode, MapNode>();	
+		HashMap<GeographicPoint, GeographicPoint> parentPair = new HashMap<GeographicPoint, GeographicPoint>();	
 
 		MapNode current = vertices.get(start);
 		visitedNodeList.add(current);
@@ -180,7 +181,7 @@ public class MapGraph {
 				if(!visitedNodeList.contains(toNeighbor)){
 					visitedNodeList.add(toNeighbor);
 					nextVistNodeList.add(toNeighbor);
-					parentPair.put(toNeighbor, current);
+					parentPair.put(toNeighbor.getLocation(), current.getLocation());
 					
 					nodeSearched.accept(toNeighbor.getLocation());
 				}			
@@ -193,21 +194,39 @@ public class MapGraph {
 		return path;
 	}
 	
-	private List<GeographicPoint> restorePath(HashMap<MapNode, MapNode> pair, GeographicPoint start, 
+	private List<GeographicPoint> restorePath(HashMap<GeographicPoint, GeographicPoint> pair, GeographicPoint start, 
 		     GeographicPoint goal){
 		List<GeographicPoint> path = new ArrayList<GeographicPoint>();
 		
 		GeographicPoint child = goal;
-		GeographicPoint parent = pair.get(child).getLocation();
 		path.add(child);
+		
+		if(pair.size() == 0) return path;
+		
+		GeographicPoint parent = pair.get(child);		
         while (!parent.equals(start)){
         	path.add(parent);
         	child = parent;
-        	parent = pair.get(child).getLocation();
+        	parent = pair.get(child);
         }
         path.add(start);
-		
+	    Collections.reverse(path);
+	    
 		return path;
+	}
+	
+	public void printMap(){
+		String map = "";
+		
+		for(GeographicPoint key: vertices.keySet()){
+		    MapNode node = vertices.get(key);
+		    map = key + "--->";
+		    List<MapEdge> outEdges = node.getOutEdges();
+		    for(MapEdge edge: outEdges){
+		    	map += "(" + edge.getEndNode().getLocation() + ") ";
+		    }
+		    System.out.println(map);
+		}
 	}
 
 	/** Find the path from start to goal using Dijkstra's algorithm
@@ -283,7 +302,16 @@ public class MapGraph {
 		MapGraph theMap = new MapGraph();
 		System.out.print("DONE. \nLoading the map...");
 		GraphLoader.loadRoadMap("data/testdata/simpletest.map", theMap);
+		theMap.printMap();
 		System.out.println("DONE.");
+		
+		System.out.println("Testing basic get methods:");
+		System.out.println("This map has " + theMap.getNumVertices() + " vertices, and " + theMap.getNumEdges() + " edges.");
+		
+		System.out.println("Testing breadth first search:");
+		GeographicPoint start = new GeographicPoint(4,2);
+		GeographicPoint goal = new GeographicPoint(6.5,0);
+		System.out.println(theMap.bfs(start, goal));
 		
 		// You can use this method for testing.  
 		
