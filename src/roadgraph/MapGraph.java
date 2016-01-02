@@ -36,7 +36,6 @@ public class MapGraph {
 	 */
 	public MapGraph()
 	{
-		// TODO: Implement in this constructor in WEEK 2
 		vertices = new HashMap<GeographicPoint, MapNode>();
 	}
 	
@@ -46,7 +45,6 @@ public class MapGraph {
 	 */
 	public int getNumVertices()
 	{
-		//TODO: Implement this method in WEEK 2
 		Set<GeographicPoint> points = getVertices();
 		
 		return points.size();
@@ -58,7 +56,6 @@ public class MapGraph {
 	 */
 	public Set<GeographicPoint> getVertices()
 	{
-		//TODO: Implement this method in WEEK 2
 		Set<GeographicPoint> result = new HashSet<GeographicPoint>();
 		
 		for(GeographicPoint key: vertices.keySet()){
@@ -74,7 +71,6 @@ public class MapGraph {
 	public int getNumEdges()
 	{
 		int total = 0;
-		//TODO: Implement this method in WEEK 2
 		for(GeographicPoint key: vertices.keySet()){
 			MapNode vertex = vertices.get(key);
 			List<MapEdge> outEdges = vertex.getOutEdges();
@@ -94,7 +90,6 @@ public class MapGraph {
 	 */
 	public boolean addVertex(GeographicPoint location)
 	{
-		// TODO: Implement this method in WEEK 2
 		if(location == null) return false;
 		if(vertices.containsKey(location)) return false;
 		
@@ -119,7 +114,6 @@ public class MapGraph {
 	public void addEdge(GeographicPoint from, GeographicPoint to, String roadName,
 			String roadType, double length) throws IllegalArgumentException {
 
-		//TODO: Implement this method in WEEK 2
 		if(from == null || to == null || roadName == null || roadType == null){
 			throw new IllegalArgumentException();
 		}
@@ -162,14 +156,18 @@ public class MapGraph {
 	public List<GeographicPoint> bfs(GeographicPoint start, 
 			 					     GeographicPoint goal, Consumer<GeographicPoint> nodeSearched)
 	{
-		// TODO: Implement this method in WEEK 2
 		
 		// Hook for visualization.  See writeup.
 		//nodeSearched.accept(next.getLocation());
+		
+		// Queue to store nodes that will be visited next. Key data structure to implement bfs.
 		LinkedList<MapNode> nextVistNodeList = new LinkedList<MapNode>();
+		// List of nodes that have already been explored.
 		List<MapNode> visitedNodeList = new ArrayList<MapNode>();
+		// Map to store history, used to retrieve path. 
 		HashMap<GeographicPoint, GeographicPoint> parentPair = new HashMap<GeographicPoint, GeographicPoint>();	
 
+		// Start from staring point.
 		MapNode current = vertices.get(start);
 		visitedNodeList.add(current);
 		
@@ -177,31 +175,48 @@ public class MapGraph {
 			List<MapEdge> outEdges = current.getOutEdges();
 			for(MapEdge edge: outEdges){
 				MapNode toNeighbor = edge.getEndNode();
-				
+				// Avoid adding node that has already been explored.
 				if(!visitedNodeList.contains(toNeighbor)){
 					visitedNodeList.add(toNeighbor);
 					nextVistNodeList.add(toNeighbor);
 					parentPair.put(toNeighbor.getLocation(), current.getLocation());
 					
+					// For visualization.
 					nodeSearched.accept(toNeighbor.getLocation());
 				}			
-			}		
-			current = nextVistNodeList.remove();			
+			}
+			
+			if(nextVistNodeList.size() != 0){
+				// Dequeue the first element. 
+				current = nextVistNodeList.remove();				
+			}
+			else{
+				// Queue is empty. No more nodes need to be explored. 
+				break;
+			}
 		}
 		
-		List<GeographicPoint> path = restorePath(parentPair, start, goal);
-        
+		// path can be null, if there is no path from start to goal.
+		List<GeographicPoint> path = restorePath(parentPair, start, goal);        
 		return path;
 	}
 	
+	/**
+	 * Private method to return a complete path from start point to end point
+	 * @param List of parent pairs
+	 * @param search starting point
+	 * @param search ending point
+	 * @return a complete list of path from start to end, can be null
+	 */
 	private List<GeographicPoint> restorePath(HashMap<GeographicPoint, GeographicPoint> pair, GeographicPoint start, 
 		     GeographicPoint goal){
+		
+		// If pair is empty, means there is no path from start to end. Return null.
+		if(pair.size() == 0) return null;
+		
 		List<GeographicPoint> path = new ArrayList<GeographicPoint>();
-		
 		GeographicPoint child = goal;
-		path.add(child);
-		
-		if(pair.size() == 0) return path;
+		path.add(child);		
 		
 		GeographicPoint parent = pair.get(child);		
         while (!parent.equals(start)){
@@ -210,11 +225,18 @@ public class MapGraph {
         	parent = pair.get(child);
         }
         path.add(start);
+        
+        // Reverse list, return list from start to end. 
 	    Collections.reverse(path);
 	    
 		return path;
 	}
 	
+	/**
+	 * Help method for debugging. 
+	 * Make sure Mapgraph is loaded correctly. 
+	 * Print each vertex along with their out edge neighbors.
+	 */
 	public void printMap(){
 		String map = "";
 		

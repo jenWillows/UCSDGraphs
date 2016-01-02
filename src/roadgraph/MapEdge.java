@@ -7,6 +7,7 @@ public class MapEdge {
     private String roadType;
     private double roadLength;
     
+    // Constructor.
     public MapEdge(MapNode s, MapNode e, String name, String type, double len){
         startNode = s;
         endNode = e;
@@ -15,11 +16,12 @@ public class MapEdge {
         roadLength = len;
     }
     
+    /**
+     * Get the end node of this map edge.
+     * @return
+     */
     public MapNode getEndNode(){
     	return endNode;
-    }
-    public String getStreetName(){
-    	return roadName;
     }
     
 }
