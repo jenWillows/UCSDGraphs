@@ -219,10 +219,18 @@ public class MapGraph {
 		path.add(child);		
 		
 		GeographicPoint parent = pair.get(child);		
+		if(parent == null){
+			// path is not found
+			return null;
+		}
+		
         while (!parent.equals(start)){
         	path.add(parent);
         	child = parent;
         	parent = pair.get(child);
+        	if(parent == null) {
+        		return null;
+        	}
         }
         path.add(start);
         
