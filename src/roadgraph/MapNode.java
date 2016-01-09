@@ -6,7 +6,7 @@ import java.util.List;
 import geography.GeographicPoint;
 
 public class MapNode {
-    private GeographicPoint location;
+    public GeographicPoint location;
     private List<MapEdge> outEdges;
     
     // Constructor.
@@ -15,6 +15,7 @@ public class MapNode {
     	outEdges = new ArrayList<MapEdge>();
     }
     
+    
     /**
      * Get geographic location of this map node. 
      * @return
@@ -22,6 +23,7 @@ public class MapNode {
     public GeographicPoint getLocation(){
     	return location;
     }
+    
     
     /**
      * Get all our edges of this map node.
@@ -38,4 +40,5 @@ public class MapNode {
     public void addOutEdge(MapEdge edge){
     	outEdges.add(edge);
     }
+
 }
