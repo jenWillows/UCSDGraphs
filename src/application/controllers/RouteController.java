@@ -27,6 +27,12 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleGroup;
 import javafx.util.StringConverter;
 
+/**
+ * This controller is set up components behaviors when they are fired.
+ * Behaviors methods are described in application.services package.
+ * @author InfoBeyond
+ *
+ */
 public class RouteController {
 	// Strings for slider labels
 	public static final int BFS = 3;
@@ -54,10 +60,10 @@ public class RouteController {
     private MarkerManager markerManager;
 
 
-
+    // Constructor
 	public RouteController(RouteService routeService, Button displayButton, Button hideButton,
 						   Button resetButton, Button startButton, Button destinationButton,
-						   ToggleGroup group, List<RadioButton> searchOptions, Button visualizationButton,
+						   ToggleGroup group, Button visualizationButton,
 						   CLabel<geography.GeographicPoint> startLabel, CLabel<geography.GeographicPoint> endLabel,
 						   CLabel<geography.GeographicPoint> pointLabel, SelectManager manager, MarkerManager markerManager) {
         // save parameters

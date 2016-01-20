@@ -1,44 +1,42 @@
 package roadgraph;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import geography.GeographicPoint;
 
-public class MapNode {
-    public GeographicPoint location;
-    private List<MapEdge> outEdges;
-    
-    // Constructor.
-    public MapNode(GeographicPoint loc){
-    	location = loc;
-    	outEdges = new ArrayList<MapEdge>();
+public class MapNode extends MapNodeBase implements Comparable<MapNode>{
+	
+	private double distanceFromStart;
+	private double totalDistance;
+	
+    public MapNode(GeographicPoint loc) {
+		super(loc);
+		// TODO Auto-generated constructor stub
+		distanceFromStart = Double.POSITIVE_INFINITY;
+		totalDistance = Double.POSITIVE_INFINITY;
+	}
+
+	public double getDistanceFromStart(){
+    	return distanceFromStart;
     }
     
-    
-    /**
-     * Get geographic location of this map node. 
-     * @return
-     */
-    public GeographicPoint getLocation(){
-    	return location;
+    public void updateDistanceFromStart(double d){
+    	distanceFromStart = d;
     }
     
-    
-    /**
-     * Get all our edges of this map node.
-     * @return
-     */
-    public List<MapEdge> getOutEdges(){
-    	return outEdges;
+    public void updateTotalDistance(double d, double p){
+    	totalDistance = d + p;
     }
     
-    /**
-     * Add one out edge to this map node.
-     * @param edge
-     */
-    public void addOutEdge(MapEdge edge){
-    	outEdges.add(edge);
+    public double getTotalDistance(){
+    	return totalDistance;
     }
 
+	@Override
+	public int compareTo(MapNode o) {
+		// TODO Auto-generated method stub
+		if(this.totalDistance < o.totalDistance)
+			return -1;
+		if(this.totalDistance > o.totalDistance)
+			return 1;
+		return 0;
+	}
 }

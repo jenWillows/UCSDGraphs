@@ -30,14 +30,14 @@ import util.GraphLoader;
  */
 public class MapGraph {
 	//TODO: Add your member variables here in WEEK 2
-	private HashMap<GeographicPoint, MapNodeForDij> vertices;
+	private HashMap<GeographicPoint, MapNode> vertices;
 	
 	/** 
 	 * Create a new empty MapGraph 
 	 */
 	public MapGraph()
 	{
-		vertices = new HashMap<GeographicPoint, MapNodeForDij>();
+		vertices = new HashMap<GeographicPoint, MapNode>();
 	}
 	
 	/**
@@ -73,7 +73,7 @@ public class MapGraph {
 	{
 		int total = 0;
 		for(GeographicPoint key: vertices.keySet()){
-			MapNode vertex = vertices.get(key);
+			MapNodeBase vertex = vertices.get(key);
 			List<MapEdge> outEdges = vertex.getOutEdges();
 			total += outEdges.size();
 		}
@@ -94,7 +94,7 @@ public class MapGraph {
 		if(location == null) return false;
 		if(vertices.containsKey(location)) return false;
 		
-		MapNodeForDij newNode = new MapNodeForDij(location);
+		MapNode newNode = new MapNode(location);
 		vertices.put(location, newNode);
 		
 		return true;
@@ -125,8 +125,8 @@ public class MapGraph {
 			throw new IllegalArgumentException();
 		}
 		
-		MapNodeForDij fromVertex = vertices.get(from);
-		MapNodeForDij toVertex = vertices.get(to);
+		MapNode fromVertex = vertices.get(from);
+		MapNode toVertex = vertices.get(to);
 		
 		MapEdge newEdge = new MapEdge(fromVertex, toVertex, roadName, roadType, length);
 		fromVertex.addOutEdge(newEdge);
@@ -162,20 +162,28 @@ public class MapGraph {
 		//nodeSearched.accept(next.getLocation());
 		
 		// Queue to store nodes that will be visited next. Key data structure to implement bfs.
-		LinkedList<MapNode> nextVistNodeList = new LinkedList<MapNode>();
+		LinkedList<MapNodeBase> nextVistNodeList = new LinkedList<MapNodeBase>();
 		// List of nodes that have already been explored.
-		List<MapNode> visitedNodeList = new ArrayList<MapNode>();
+		List<MapNodeBase> visitedNodeList = new ArrayList<MapNodeBase>();
 		// Map to store history, used to retrieve path. 
 		HashMap<GeographicPoint, GeographicPoint> parentPair = new HashMap<GeographicPoint, GeographicPoint>();	
 
 		// Start from staring point.
-		MapNode current = vertices.get(start);
+		MapNodeBase current = vertices.get(start);
 		visitedNodeList.add(current);
 		
 		while(!current.getLocation().equals(goal)){
 			List<MapEdge> outEdges = current.getOutEdges();
-			for(MapEdge edge: outEdges){
-				MapNode toNeighbor = edge.getEndNode();
+			List<MapEdge> outNonResidentialEdges = selNonResidentialEdges(outEdges);
+			List<MapEdge> outEdgesPool = null;
+			if(outNonResidentialEdges.size() == 1){
+				outEdgesPool = outEdges;
+			}else{
+				outEdgesPool = outNonResidentialEdges;
+			}
+			
+			for(MapEdge edge: outEdgesPool){
+				MapNodeBase toNeighbor = edge.getEndNode();
 				// Avoid adding node that has already been explored.
 				if(!visitedNodeList.contains(toNeighbor)){
 					visitedNodeList.add(toNeighbor);
@@ -250,7 +258,7 @@ public class MapGraph {
 		String map = "";
 		
 		for(GeographicPoint key: vertices.keySet()){
-		    MapNode node = vertices.get(key);
+		    MapNodeBase node = vertices.get(key);
 		    map = key + "--->";
 		    List<MapEdge> outEdges = node.getOutEdges();
 		    for(MapEdge edge: outEdges){
@@ -290,20 +298,20 @@ public class MapGraph {
 		int count = 0;
 		
 		// Queue to store nodes that will be visited next. 
-		PriorityQueue<MapNodeForDij> nextVisitNodePQ = new PriorityQueue<MapNodeForDij>(100);
+		PriorityQueue<MapNode> nextVisitNodePQ = new PriorityQueue<MapNode>(100);
 		// List of nodes that have already been explored.
-		List<MapNode> visitedNodeList = new ArrayList<MapNode>();
+		List<MapNodeBase> visitedNodeList = new ArrayList<MapNodeBase>();
 		// Map to store history, used to retrieve path. 
 		HashMap<GeographicPoint, GeographicPoint> parentPair = new HashMap<GeographicPoint, GeographicPoint>();	
 		
 		// Clear 0.
 		for(GeographicPoint key: vertices.keySet()){
-			MapNodeForDij node = vertices.get(key);
+			MapNode node = vertices.get(key);
 			node.updateDistanceFromStart(Double.POSITIVE_INFINITY);
 			node.updateTotalDistance(Double.POSITIVE_INFINITY, 0.0);
 		}
 		// Start from starting point.
-		MapNodeForDij current = vertices.get(start);
+		MapNode current = vertices.get(start);
 		current.updateDistanceFromStart(0.0);
 		nextVisitNodePQ.add(current);
 		
@@ -318,15 +326,15 @@ public class MapGraph {
 				}
 				List<MapEdge> outEdges = current.getOutEdges();
 				for(MapEdge outEdge: outEdges){
-					MapNodeForDij neighbor = outEdge.getEndNode();
+					MapNode neighbor = outEdge.getEndNode();
 	
 					if(!visitedNodeList.contains(neighbor)){
-						double distance = current.getDistanceFromStart() + outEdge.getLength();
-						if(distance < neighbor.getDistanceFromStart()){
+						double disFromStart = current.getDistanceFromStart() + outEdge.getLength();
+						if(disFromStart < neighbor.getDistanceFromStart()){
 							//update 
-							neighbor.updateDistanceFromStart(distance);
-							neighbor.updateTotalDistance(distance, 0);
-							nextVisitNodePQ.add(((MapNodeForDij) neighbor));
+							neighbor.updateDistanceFromStart(disFromStart);
+							neighbor.updateTotalDistance(disFromStart, 0);
+							nextVisitNodePQ.add(((MapNode) neighbor));
 							parentPair.put(neighbor.getLocation(), current.getLocation());
 						}
 					}
@@ -370,21 +378,21 @@ public class MapGraph {
 		//nodeSearched.accept(next.getLocation());
 		int count = 0;
 		// Queue to store nodes that will be visited next. 
-		PriorityQueue<MapNodeForDij> nextVisitNodePQ = new PriorityQueue<MapNodeForDij>(100);
+		PriorityQueue<MapNode> nextVisitNodePQ = new PriorityQueue<MapNode>(100);
 		// List of nodes that have already been explored.
-		List<MapNode> visitedNodeList = new ArrayList<MapNode>();
+		List<MapNodeBase> visitedNodeList = new ArrayList<MapNodeBase>();
 		// Map to store history, used to retrieve path. 
 		HashMap<GeographicPoint, GeographicPoint> parentPair = new HashMap<GeographicPoint, GeographicPoint>();	
 		
 		// Clear 0.
 		for(GeographicPoint key: vertices.keySet()){
-			MapNodeForDij node = vertices.get(key);
+			MapNode node = vertices.get(key);
 			node.updateDistanceFromStart(Double.POSITIVE_INFINITY);
 			node.updateTotalDistance(Double.POSITIVE_INFINITY, 0.0);
 		}
 		
 		// Start from starting point.
-		MapNodeForDij current = vertices.get(start);
+		MapNode current = vertices.get(start);
 		current.updateDistanceFromStart(0.0);
 		nextVisitNodePQ.add(current);
 		
@@ -399,15 +407,16 @@ public class MapGraph {
 				}
 				List<MapEdge> outEdges = current.getOutEdges();
 				for(MapEdge outEdge: outEdges){
-					MapNodeForDij neighbor = outEdge.getEndNode();
+					MapNode neighbor = outEdge.getEndNode();
 	
 					if(!visitedNodeList.contains(neighbor)){
-						double distance = current.getDistanceFromStart() + outEdge.getLength();
-						double totalDis = distance + neighbor.getLocation().distance(goal);
+						double disFromStart = current.getDistanceFromStart() + outEdge.getLength();
+						double predictDisToGoal = neighbor.getLocation().distance(goal);
+						double totalDis = disFromStart + predictDisToGoal;
 						if(totalDis < neighbor.getTotalDistance()){
 							//update 
-							neighbor.updateDistanceFromStart(distance);
-							neighbor.updateTotalDistance(distance, neighbor.getLocation().distance(goal));
+							neighbor.updateDistanceFromStart(disFromStart);
+							neighbor.updateTotalDistance(disFromStart, predictDisToGoal);
 							nextVisitNodePQ.add(neighbor);
 							parentPair.put(neighbor.getLocation(), current.getLocation());
 						}
@@ -425,10 +434,22 @@ public class MapGraph {
 	}
 
 	
+	private List<MapEdge> selNonResidentialEdges(List<MapEdge> edges){
+		List<MapEdge> nonResidentialEdges = new ArrayList<MapEdge>();
+		
+		for(MapEdge edge : edges){
+			String type = edge.getRoadType();
+			if (!type.equals("residential")){
+				nonResidentialEdges.add(edge);
+			}
+		}
+		
+		return nonResidentialEdges;
+	}
 	
 	public static void main(String[] args)
 	{
-		/*
+		
 		System.out.print("Making a new map...");
 		MapGraph theMap = new MapGraph();
 		System.out.print("DONE. \nLoading the map...");
@@ -453,10 +474,12 @@ public class MapGraph {
 		start = new GeographicPoint(1,1);
 		goal = new GeographicPoint(8,-1);
 		System.out.println(theMap.aStarSearch(start, goal));
+		
 		// You can use this method for testing.  
-		*/
+		
 		
 		// Use this code in Week 3 End of Week Quiz
+		/*
 		MapGraph theMap = new MapGraph();
 		System.out.print("DONE. \nLoading the map...");
 		GraphLoader.loadRoadMap("data/maps/utc.map", theMap);
@@ -469,8 +492,8 @@ public class MapGraph {
 		List<GeographicPoint> route = theMap.dijkstra(start,end);
 		List<GeographicPoint> route2 = theMap.aStarSearch(start,end);
 
-		
-		
+		List<GeographicPoint> route3 = theMap.aStarSearchAvoidResidential(start,end);
+		*/
 	}
 	
 }

@@ -147,7 +147,7 @@ public class MapApp extends Application
         RouteService rs = new RouteService(mapComponent, markerManager);
         //System.out.println("in map ready : " + this.getClass());
         // initialize controllers
-				new RouteController(rs, routeButton, hideRouteButton, resetButton, startButton, destinationButton, group, searchOptions, visualizationButton,
+		new RouteController(rs, routeButton, hideRouteButton, resetButton, startButton, destinationButton, group, visualizationButton,
 															  startLabel, endLabel, pointLabel, manager, markerManager);
         new FetchController(gs, rs, tf, fetchButton, cb, displayButton);
     });

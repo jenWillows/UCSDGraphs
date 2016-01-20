@@ -44,6 +44,7 @@ public class FetchController {
 
     public FetchController(GeneralService generalService, RouteService routeService, TextField writeFile,
     					   Button fetchButton, ComboBox<DataSet> cb, Button displayButton) {
+    	
         this.generalService = generalService;
         this.routeService = routeService;
         this.fetchButton = fetchButton;

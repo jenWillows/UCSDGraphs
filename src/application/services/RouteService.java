@@ -28,6 +28,11 @@ import gmapsfx.javascript.object.MVCArray;
 import gmapsfx.shapes.Polyline;
 import javafx.scene.control.Button;
 
+/**
+ * Route related services.
+ * @author InfoBeyond
+ *
+ */
 public class RouteService {
 	private GoogleMap map;
 
